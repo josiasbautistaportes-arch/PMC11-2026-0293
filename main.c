@@ -80,40 +80,42 @@ void ordenar_por_id(RegistroUnidad unidades[], int n)
     }
 }
 
-/* main temporal: solo para probar ordenar y ordenar_por_id */
-static void imprimir_ids(const char *etiqueta, const RegistroUnidad u[], int n)
+/* Busqueda binaria por id. El arreglo debe estar ordenado por id.
+   Devuelve el score o -1 si no existe. */
+int buscar(const RegistroUnidad unidades[], int n, int q)
 {
-    int i;
+    int izq = 0;
+    int der = n - 1;
 
-    printf("%s", etiqueta);
-    for (i = 0; i < n; i++) {
-        printf(" %d", u[i].id);
+    while (izq <= der) {
+        int medio = (izq + der) / 2;
+
+        if (unidades[medio].id == q) {
+            return unidades[medio].score;
+        } else if (unidades[medio].id < q) {
+            izq = medio + 1;
+        } else {
+            der = medio - 1;
+        }
     }
-    printf("\n");
+    return -1;
 }
 
+/* main temporal: solo para probar buscar */
 int main(void)
 {
-    RegistroUnidad a[2] = {{30, "MOTOR", {0, 40}, 6, 1},
-                           {10, "VALVULA", {1, 20}, 359, 1}};
-    RegistroUnidad b[3] = {{30, "C", {0, 0}, 2, 1},
-                           {20, "B", {0, 0}, 2, 1},
-                           {10, "A", {0, 0}, 2, 1}};
-    RegistroUnidad c[3] = {{30, "X", {0, 0}, 500, 1},
-                           {10, "Y", {0, 0}, 6, 1},
-                           {20, "Z", {0, 0}, 100, 1}};
+    RegistroUnidad u[3] = {{30, "C", {0, 0}, 2, 1},
+                           {10, "A", {0, 0}, 8, 1},
+                           {20, "B", {0, 0}, 5, 1}};
 
-    ordenar(a, 2);
-    imprimir_ids("ORDER", a, 2);
+    ordenar_por_id(u, 3);
 
-    ordenar(b, 3);
-    imprimir_ids("ORDER", b, 3);
-
-    ordenar(c, 3);
-    imprimir_ids("ORDER", c, 3);
-
-    ordenar_por_id(c, 3);
-    imprimir_ids("POR_ID", c, 3);
+    printf("FIND 20 %d\n", buscar(u, 3, 20));
+    printf("FIND 10 %d\n", buscar(u, 3, 10));
+    printf("FIND 30 %d\n", buscar(u, 3, 30));
+    printf("FIND 99 %d\n", buscar(u, 3, 99));
+    printf("FIND 5 %d\n", buscar(u, 3, 5));
 
     return 0;
 }
+
