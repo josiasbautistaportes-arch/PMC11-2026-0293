@@ -30,22 +30,26 @@ void calcular(const int muestras_unidad[], int m, int tipo, int p,
     }
 }
 
-/* main temporal: solo para probar calcular */
+/* Suma recursiva de los scores de las primeras n unidades */
+int total_rec(const RegistroUnidad unidades[], int n)
+{
+    if (n == 0) {   /* caso base */
+        return 0;
+    }
+    return unidades[n - 1].score + total_rec(unidades, n - 1);
+}
+
+/* main temporal: solo para probar total_rec */
 int main(void)
 {
-    int motor[] = {10, 50, 70, 30, 90};
-    int valvula[] = {20, 25, 10, 80, 5};
-    int sin[] = {100, 0, 100, 0};
-    int score, estado;
+    RegistroUnidad u[2];
 
-    calcular(motor, 5, 0, 40, &score, &estado);
-    printf("MOTOR %d %d\n", score, estado);
+    u[0].score = 6;
+    u[1].score = 359;
 
-    calcular(valvula, 5, 1, 20, &score, &estado);
-    printf("VALVULA %d %d\n", score, estado);
-
-    calcular(sin, 4, 1, 100, &score, &estado);
-    printf("SIN %d %d\n", score, estado);
+    printf("TOTAL %d\n", total_rec(u, 2));
+    printf("TOTAL %d\n", total_rec(u, 1));
+    printf("TOTAL %d\n", total_rec(u, 0));
 
     return 0;
 }
