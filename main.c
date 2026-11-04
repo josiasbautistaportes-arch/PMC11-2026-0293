@@ -1,4 +1,6 @@
 #include <stdio.h>
+#include <string.h>
+#include <ctype.h>
 #include "reto.h"
 
 /* Procesa las muestras de UNA unidad y devuelve score y estado
@@ -101,21 +103,108 @@ int buscar(const RegistroUnidad unidades[], int n, int q)
     return -1;
 }
 
-/* main temporal: solo para probar buscar */
-int main(void)
+/* Lee y valida toda la entrada.
+   Devuelve 1 si es valida y 0 si hay cualquier error. */
+static int leer_datos(int *n, int *m, int *q,
+                      RegistroUnidad unidades[],
+                      int muestras[][MAX_MUESTRAS])
 {
-    RegistroUnidad u[3] = {{30, "C", {0, 0}, 2, 1},
-                           {10, "A", {0, 0}, 8, 1},
-                           {20, "B", {0, 0}, 5, 1}};
+    int i, j, k;
+    char nombre_tmp[32];
+    char extra[2];
 
-    ordenar_por_id(u, 3);
+    if (scanf("%d %d %d", n, m, q) != 3) {
+        return 0;
+    }
+    if (*n < 1 || *n > MAX_UNIDADES) {
+        return 0;
+    }
+    if (*m < 1 || *m > MAX_MUESTRAS) {
+        return 0;
+    }
+    if (*q < 1 || *q > 9999) {
+        return 0;
+    }
 
-    printf("FIND 20 %d\n", buscar(u, 3, 20));
-    printf("FIND 10 %d\n", buscar(u, 3, 10));
-    printf("FIND 30 %d\n", buscar(u, 3, 30));
-    printf("FIND 99 %d\n", buscar(u, 3, 99));
-    printf("FIND 5 %d\n", buscar(u, 3, 5));
+    for (i = 0; i < *n; i++) {
+        int id, tipo, p;
+        size_t largo, c;
 
-    return 0;
+        if (scanf("%d %31s %d %d", &id, nombre_tmp, &tipo, &p) != 4) {
+            return 0;
+        }
+        if (id < 1 || id > 9999) {
+            return 0;
+        }
+        for (k = 0; k < i; k++) {          /* id repetido */
+            if (unidades[k].id == id) {
+                return 0;
+            }
+        }
+
+        largo = strlen(nombre_tmp);
+        if (largo < 1 || largo > 15) {
+            return 0;
+        }
+        for (c = 0; c < largo; c++) {
+            if (!isalnum((unsigned char)nombre_tmp[c]) && nombre_tmp[c] != '_') {
+                return 0;
+            }
+        }
+
+        if (tipo != 0 && tipo != 1) {
+            return 0;
+        }
+        if (p < 0 || p > 100) {
+            return 0;
+        }
+
+        for (j = 0; j < *m; j++) {
+            int x;
+
+            if (scanf("%d", &x) != 1) {
+                return 0;
+            }
+            if (x < 0 || x > 100) {
+                return 0;
+            }
+            muestras[i][j] = x;
+        }
+
+        unidades[i].id = id;
+        strcpy(unidades[i].nombre, nombre_tmp);   /* ya validado: cabe */
+        unidades[i].config.tipo = tipo;
+        unidades[i].config.p = p;
+        unidades[i].score = 0;
+        unidades[i].estado = 0;
+    }
+
+    if (scanf("%1s", extra) == 1) {   /* sobraron datos */
+        return 0;
+    }
+    return 1;
 }
 
+/* main temporal: solo para probar la lectura y validacion */
+int main(void)
+{
+    int n, m, q, i, j;
+    RegistroUnidad unidades[MAX_UNIDADES];
+    int muestras[MAX_UNIDADES][MAX_MUESTRAS];
+
+    if (!leer_datos(&n, &m, &q, unidades, muestras)) {
+        printf("ERROR\n");
+        return 0;
+    }
+
+    printf("OK %d %d %d\n", n, m, q);
+    for (i = 0; i < n; i++) {
+        printf("%d %s %d %d :", unidades[i].id, unidades[i].nombre,
+               unidades[i].config.tipo, unidades[i].config.p);
+        for (j = 0; j < m; j++) {
+            printf(" %d", muestras[i][j]);
+        }
+        printf("\n");
+    }
+    return 0;
+}
