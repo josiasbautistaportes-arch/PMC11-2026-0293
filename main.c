@@ -185,26 +185,53 @@ static int leer_datos(int *n, int *m, int *q,
     return 1;
 }
 
-/* main temporal: solo para probar la lectura y validacion */
 int main(void)
 {
-    int n, m, q, i, j;
+    int n, m, q, i;
     RegistroUnidad unidades[MAX_UNIDADES];
+    RegistroUnidad ordenadas[MAX_UNIDADES];
+    RegistroUnidad por_id[MAX_UNIDADES];
     int muestras[MAX_UNIDADES][MAX_MUESTRAS];
 
+    /* 1. leer y validar todo antes de imprimir nada */
     if (!leer_datos(&n, &m, &q, unidades, muestras)) {
         printf("ERROR\n");
         return 0;
     }
 
-    printf("OK %d %d %d\n", n, m, q);
+    /* 2. calcular score y estado de cada unidad */
     for (i = 0; i < n; i++) {
-        printf("%d %s %d %d :", unidades[i].id, unidades[i].nombre,
-               unidades[i].config.tipo, unidades[i].config.p);
-        for (j = 0; j < m; j++) {
-            printf(" %d", muestras[i][j]);
-        }
-        printf("\n");
+        calcular(muestras[i], m, unidades[i].config.tipo,
+                 unidades[i].config.p,
+                 &unidades[i].score, &unidades[i].estado);
     }
+
+    /* 3. resultados individuales, en el orden original */
+    for (i = 0; i < n; i++) {
+        printf("%d %d %d\n", unidades[i].id, unidades[i].score,
+               unidades[i].estado);
+    }
+
+    /* 4. total recursivo */
+    printf("TOTAL %d\n", total_rec(unidades, n));
+
+    /* 5. ORDER: copia ordenada por score e id */
+    for (i = 0; i < n; i++) {
+        ordenadas[i] = unidades[i];
+    }
+    ordenar(ordenadas, n);
+    printf("ORDER");
+    for (i = 0; i < n; i++) {
+        printf(" %d", ordenadas[i].id);
+    }
+    printf("\n");
+
+    /* 6. FIND: copia ordenada por id y busqueda binaria */
+    for (i = 0; i < n; i++) {
+        por_id[i] = unidades[i];
+    }
+    ordenar_por_id(por_id, n);
+    printf("FIND %d %d\n", q, buscar(por_id, n, q));
+
     return 0;
 }
